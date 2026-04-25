@@ -1,0 +1,9 @@
+{
+  "name": "pi-paste-image",
+  "version": "1.0.0",
+  "description": "Paste clipboard images into pi conversations — saves clipboard image to temp file and inserts the path into the editor.",
+  "type": "module",
+  "pi": {
+    "extensions": ["./src/index.ts"]
+  }
+}
