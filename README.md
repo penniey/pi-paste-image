@@ -27,11 +27,15 @@ pi install ./pi-paste-image
 - **Keyboard shortcut**: `Ctrl+Alt+V` (uses Alt instead of Shift to avoid terminal paste conflict)
 - **Command**: `/paste-image`
 
+Both methods are **near-instant** after the first use (~50ms) — the clipboard reader runs as a persistent background process, so `.NET` assemblies load only once on startup.
+
 Both methods append the image file path to whatever text you already have in the editor, so you can type your question around it:
 
 ```
 What do you think about this? C:\Users\hugo2\AppData\Local\Temp\pi_clipboard_12345.png
 ```
+
+> **Why not Ctrl+V?** Terminals intercept Ctrl+V at a level below pi for raw text paste. When the clipboard contains an image, terminals paste nothing or garbled bytes. A TUI app can't override this, so we use Ctrl+Alt+V instead.
 
 ## Platform support
 
@@ -40,11 +44,13 @@ What do you think about this? C:\Users\hugo2\AppData\Local\Temp\pi_clipboard_123
 
 ## How it works
 
-The extension runs a PowerShell script (encoded via `-EncodedCommand` to avoid quoting issues) that:
+The extension spawns a **persistent PowerShell process** on `session_start` that:
 
-1. Loads the `.NET` clipboard API
-2. Extracts the image via `[System.Windows.Forms.Clipboard]::GetImage()`
-3. Saves it as PNG to `%TEMP%`
-4. Returns the file path to Node.js, which inserts it into the pi editor
+1. Loads `.NET` clipboard assemblies once (the slow part — done only at startup)
+2. Listens on stdin for `GET_CLIPBOARD_IMAGE` commands
+3. Extracts the image via `[System.Windows.Forms.Clipboard]::GetImage()`
+4. Saves it as PNG to `%TEMP%` and writes the file path to stdout
+
+Because the process stays alive, every paste after the first is ~instant — just a single stdin/stdout round-trip with no assembly loading overhead.
 
 The temp file persists until Windows cleans it up, giving pi's `read` tool time to open it.
