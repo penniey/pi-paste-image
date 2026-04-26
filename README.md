@@ -13,10 +13,8 @@ When you copy an image to your clipboard (screenshot, copied image, etc.), this 
 ## Installation
 
 ```bash
-pi install git:github.com/<your-username>/pi-paste-image
+pi install git:github.com/penniey/pi-paste-image
 ```
-
-Replace `<your-username>` with your GitHub username after pushing.
 
 Or install from a local path:
 
